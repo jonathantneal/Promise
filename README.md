@@ -1,6 +1,6 @@
-# Promises
+# Promise
 
-This Promises polyfill follows the [WHATWG specification](http://dom.spec.whatwg.org/#promises).
+This Promise polyfill follows the current [WHATWG specification](http://dom.spec.whatwg.org/#promises).
 
 ## Usage
 

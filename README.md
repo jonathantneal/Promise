@@ -1,6 +1,6 @@
 # Promise
 
-This Promise polyfill follows the current [WHATWG specification](http://dom.spec.whatwg.org/#promises).
+This Promise polyfill follows the current [Promises/A+ specification](https://github.com/promises-aplus/promises-spec).
 
 ## Usage
 
@@ -10,64 +10,70 @@ Creating a Promise is simple. We create a new **Promise** object.
 var promise = new Promise();
 ```
 
-The Promise object is immediately initialized with a **function**.
+A Promise is immediately initialized with a **Resolver** function.
 
 ```javascript
 var promise = new Promise(function () {});
 ```
 
-The function is given one parameter, which is referred to as a **Resolver**.
+A **Resolver** is given two arguments, **fulfill** and **reject**. They control the Promise.
 
 ```javascript
-var promise = new Promise(function (resolver) {});
-```
-
-The Resolver controls the Promise. It can **resolve** or **reject** the Promise.
-
-```javascript
-var promise = new Promise(function (resolver) {
-	resolver.resolve('Put anything here.');
+var promise = new Promise(function (fulfill, reject) {
+	if (true) {
+		// fulfill the promise because everything worked
+		fulfill();
+	} else {
+		// reject the promise because something failed
+		reject();
+	}
 });
 ```
 
-The above Promise is immediately initialized with a function which immediately resolves itself. In practice, Promises are usually used for things that take an uncertain amount of time.
-
-Additional functions can be added to a Promise using a **then** method. The additional functions will not run until a Promise has been **resolved** or **rejected**. If a Promise has already been resolved, the additional functions will be run immediately, but asynchronously.
+From here, **then** is used to add functions which will not run until a Promise has been **resolved** or **rejected**. If a Promise has already been resolved, the additional functions will be run immediately (though asynchronously).
 
 ```javascript
-var promise = new Promise(function (resolver) {
-	resolver.resolve('Put anything here.');
+var promise = new Promise(function (resolve) {
+	if (true) {
+		resolve('Put anything here.');
+	} else {
+		reject('Put a sad face here.');
+	}
 });
 
-promise.then(function (resolveValue) { // runs asynchronously
-	console.log(resolveValue); // will log 'Put anything here.'
-});
+promise.then(
+	// if resolved
+	function (resolveValue) {
+		console.log(resolveValue); // logs 'Put anything here.'
+	},
+	// if rejected
+	function (rejectValue) {
+		console.log(resolveValue); // logs 'Put a sad face here.'
+	}
+);
 ```
 
-With that, a useful example of a Promise would be to create a simplified **XMLHttpRequest**. 
+Promises are extremely useful for simplifying your scripts and applications. Here is an example of a Promise-based function that simplifies **XMLHttpRequest**.
 
 ```javascript
-function request(url) {
-	return new Promise(function (resolver) {
-		var request = new XMLHttpRequest();
+function get(url) {
+	return new Promise(function (resolve, reject) {
+		var xhr = new XMLHttpRequest();
 
-		request.open('GET', url);
+		xhr.open('GET', url);
 	
-		request.onload = function () {
-			if (/200|302/.test(request.status)) {
-				resolver.resolve(request.response);
+		xhr.onload = function () {
+			if (/200|302/.test(xhr.status)) {
+				resolve(xhr.responseText);
 			} else {
-				resolver.reject(new Error(request.status));
+				reject(new Error(xhr.status));
 			}
 		};
 	});
 }
 
-// usage
-// love.txt contains "All you need is love."
-request('love.txt').then(function (response) {
-	console.log(response); // logs "All you need is love."
+// USAGE: love.txt contains "All you need is love."
+get('love.txt').then(function (responseText) {
+	console.log(responseText); // logs "All you need is love."
 });
 ```
-
-The above example highlights how useful Promises are at simplifying your scripts and applications.
